@@ -32,13 +32,14 @@ def sphere_plot(embeddings, labels, figure_path=None):
         embeddings[:,1], 
         embeddings[:,2], 
         c = labels, 
-        s = 20
+        s = 20,
+        marker = '.'
     )
 
     ax.set_xlim([-1, 1])
     ax.set_ylim([-1, 1])
     ax.set_zlim([-1, 1])
-    ax.set_aspect("equal")
+    # ax.set_aspect("equal")
     plt.tight_layout()
     if figure_path is not None:
         plt.savefig(figure_path)

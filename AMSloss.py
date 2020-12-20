@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class AdMSoftmaxLoss(nn.Module):
 
-    def __init__(self, embedding_dim, no_classes, scale = 10.0, margin=0.2):
+    def __init__(self, embedding_dim, no_classes, scale = 30.0, margin=0.4):
         '''
         Additive Margin Softmax Loss
 
@@ -33,7 +33,7 @@ class AdMSoftmaxLoss(nn.Module):
         '''
         Input shape (N, embedding_dim)
         '''
-        n, m = x.shape
+        n, m = x.shape        
         assert n == len(labels)
         assert m == self.embedding_dim
         assert torch.min(labels) >= 0
@@ -47,7 +47,7 @@ class AdMSoftmaxLoss(nn.Module):
         onehot = torch.zeros(n, self.no_classes)
         onehot[range(n), labels] = 1
 
-        logits = self.alpha * torch.where(onehot == 1, psi, cos_theta)
+        logits = self.scale * torch.where(onehot == 1, psi, cos_theta)        
         err = self.loss(logits, labels)
         
-        return err
+        return err, logits

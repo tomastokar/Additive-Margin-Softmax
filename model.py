@@ -7,10 +7,10 @@ class AMLConv(nn.Module):
         super(AMLConv, self).__init__()    
 
         self.conv1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels = 32, kernel_size = 3, padding = 1),
+            nn.Conv2d(in_channels=1, out_channels = 32, kernel_size = 3),
             nn.BatchNorm2d(32),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size = 2, stride = 2)
+            nn.MaxPool2d(kernel_size = 2)
         )
         
         self.conv2 = nn.Sequential(
@@ -20,7 +20,14 @@ class AMLConv(nn.Module):
             nn.MaxPool2d(kernel_size = 2)
         )
 
-        self.lin1 = nn.Linear(64, 3)
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(in_channels = 64, out_channels = 128, kernel_size = 3),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size = 2)
+        )
+
+        self.lin1 = nn.Linear(128, 3)
 
         self.loss = AdMSoftmaxLoss(
             embedding_dim = 3, 
@@ -31,9 +38,12 @@ class AMLConv(nn.Module):
 
 
     def forward(self, x, labels = None):
-        x = self.conv1(x)
-        x = self.conv2(x)
+        x = self.conv1(x)        
+        x = self.conv2(x)        
+        x = self.conv3(x)        
+        x = x.reshape(x.size(0), -1)        
         x = self.lin1(x)
+        
         if labels is not None:
             return self.loss(x, labels)
         else:

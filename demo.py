@@ -1,5 +1,8 @@
 import os
+import yaml
 import torch
+import numpy as np
+import torch.nn.functional as F 
 
 from torch.utils.data import DataLoader
 from torch.optim import Adam
@@ -13,7 +16,7 @@ from plots import sphere_plot
 
 
 
-def train_model(model, data, batch_size = 128, max_epochs = 100, learning_rate = 0.001, decay = 1e-5, verbosity = 10):
+def train_model(model, data, batch_size = 128, max_epochs = 100, learning_rate = 0.001, decay = 1e-5):
     optimizer = Adam(
         model.parameters(), 
         lr = learning_rate,
@@ -26,17 +29,16 @@ def train_model(model, data, batch_size = 128, max_epochs = 100, learning_rate =
         shuffle = True
     )    
 
-    no_steps = len(loader)    
+    no_steps = len(loader)   
     model.train()
     for epoch in range(max_epochs):
-        for i, (x, y) in enumerate(loader):
-            err, _ = model(x, y)
+        for i, (x, labels) in enumerate(loader):            
+            err, _ = model(x, labels)
             optimizer.zero_grad()
             err.backward()
             optimizer.step()
-            
-            if i % verbosity == 0:
-                print('Epoch [{}/{}],\t Step [{}/{}],\t Loss: {:.3f}' .format(epoch + 1, max_epochs, i+1, no_steps, err.item()))
+                        
+            print('Epoch [{}/{}]\t Step [{}/{}]\t Loss: {:.3f}' .format(epoch + 1, max_epochs, i+1, no_steps, err.item()))
 
     return model
 
@@ -54,10 +56,11 @@ def eval_model(model, data, batch_size = 128):
 
     model.eval()
     with torch.no_grad():
-        for x, y in loader:
-            _, y_ = model(x, y)
-            all_labels.append(y.detach().numpy())
-            all_embeds.append(y_.detach().numpy())
+        for x, labels in loader:
+            y = model(x)
+            y = F.normalize(y)
+            all_labels.append(labels.detach().numpy())
+            all_embeds.append(y.detach().numpy())
     
     all_labels = np.concatenate(all_labels)
     all_embeds = np.concatenate(all_embeds)
@@ -65,7 +68,7 @@ def eval_model(model, data, batch_size = 128):
     return all_embeds, all_labels
 
 
-def main(args):
+def main():
     transformations = transforms.Compose(
         [
             transforms.ToTensor(),
@@ -80,23 +83,28 @@ def main(args):
         transform = transformations,
         download = True
     )
+    with open('./config.yml', 'r') as f:
+        conf = yaml.safe_load(f) 
 
     model = AMLConv()
     model = train_model(
         model, 
-        d,
-        max_epochs = args.max_epochs,
-        batch_size = args.batch_size,
-        learning_rate = args.learning_rate,
-        decay = args.decay,
-        verbosity = args.verbosity
+        d,        
+        max_epochs = conf['max_epochs'],
+        batch_size = conf['batch_size'],
+        learning_rate = conf['learning_rate'],
+        decay = conf['decay'],
     )
 
     embeddings, labels = eval_model(
         model, 
         d, 
-        args.batch_size
+        batch_size = conf['batch_size']
     )
 
     os.makedirs('./results', exist_ok=True)
-    sphere_plot(embeddings, labels, fig_path='./results/AMS.png')    
+    sphere_plot(embeddings, labels, figure_path='./results/AMS.png')    
+
+
+if __name__ == "__main__":   
+    main()
