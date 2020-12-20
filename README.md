@@ -8,10 +8,10 @@ err.backward()
 ```
 
 where:
-  - `embedding_dim` - embedding vector dimension
-  - `no_classes` - number of classes to be embedded
-  - `scale` - scale factor
-  - `margin` - additive margin 
+  - `embedding_dim` is embedding vector dimension
+  - `no_classes` is number of classes to be embedded
+  - `scale` is scale factor
+  - `margin` is additive margin 
 
 ## Demo
 
