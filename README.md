@@ -7,6 +7,12 @@ err = loss(x, labels)
 err.backward()
 ```
 
+where:
+  - `embedding_dim` - embedding vector dimension
+  - `no_classes` - number of classes to be embedded
+  - `scale` - scale factor
+  - `margin` - additive margin 
+
 ## Demo
 
 A simple demo using Fashio-MNIST dataset [2] can be run by:
@@ -16,7 +22,7 @@ python demo.py
 ```
 
 ### Results
-![AMSloss](results/AMS.png?raw=true "AMloss")
+![AMSloss](results/AMS.png?raw=true "Sphere Plot - AMSloss")
 
 [1] "Additive Margin Softmax for Face Verification." Wang, Feng, Jian Cheng, Weiyang Liu and Haijun Liu. IEEE Signal Processing Letters 25 (2018): 926-930.
 
