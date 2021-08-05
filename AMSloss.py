@@ -45,7 +45,6 @@ class AdMSoftmaxLoss(nn.Module):
         psi = cos_theta - self.margin
         
         onehot = F.one_hot(labels, self.no_classes)
-
         logits = self.scale * torch.where(onehot == 1, psi, cos_theta)        
         err = self.loss(logits, labels)
         
